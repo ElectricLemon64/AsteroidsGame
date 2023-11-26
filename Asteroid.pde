@@ -4,7 +4,9 @@ class Asteroid extends Floater{
   boolean collision;
   public Asteroid(double x, double y, double dir, int c, double xSpeed, double ySpeed){
     rotSpeed = Math.random();
-    mySize = 40;
+    mass = Math.random() * 3 + 2;
+    mySize = (int)(mass * 10);
+    health = (int)(mass * 100);
     myCenterX = x;
     myCenterY = y;
     myColor = 150;
@@ -12,16 +14,15 @@ class Asteroid extends Floater{
     corners = c;
     myXspeed = xSpeed;
     myYspeed = ySpeed;
-    xCorners = new int[]{0, 8, 16, 20, 12, 4, -12, -16, -12, -8};
-    yCorners = new int[]{20, 16, 12, 0, -8, -16, 16, -4, -3, 16};
-    mass = Math.random() * 2 + 2;
-    health = (int)(Math.random() * 100) + 200;
+    xCorners = new int[c];
+    yCorners = new int[c];
+    randomGenerate();
     collisionTimer = 0;
     collisionTimeLimit = 5;
     collision = false;
   }
   boolean checkCollision(float cX, float cY){
-   if(dist((float)myCenterX, (float)myCenterY, cX, cY) <= mySize / 2){
+   if(dist((float)myCenterX, (float)myCenterY, cX, cY) <= mySize){
       return true;
     }
     else{
@@ -58,21 +59,21 @@ class Asteroid extends Floater{
   public double getHealth(){
     return health;
   }
-  public void setHealth(int s){
-    health += s;
-    if(mass >= 1 && s < 0){
-      mass -= Math.random() * 0.05 * s;
-    }
+  public void setMass(double s){
+    mass += s;
+    health = (int)(mass * 100);
+    mySize = (int)(mass * 10);
+    randomGenerate();
   }
   public int getSize(){
     return mySize;
   }
   public void setCollision(){
     if(collision == false){
-      health -= Math.random() * 30 + 20;
-      if(mass >= 1){
-        mass -= Math.random() * 0.5;
-      }
+      mass -= (Math.random() / 10) * Math.sqrt(Math.pow(myXspeed, 2) + Math.pow(myYspeed, 2));
+      mySize = (int)(mass * 10);
+      health = (int)(mass * 100);
+      randomGenerate();
     }
     collision = true;
   }
@@ -98,7 +99,25 @@ class Asteroid extends Floater{
     setCollision();
   }
   public void unIntrude(double amount, double dir){
-    myCenterX += amount * Math.cos(dir) * 1.10;
-    myCenterY += amount * Math.sin(dir) * 1.10;
+    myCenterX += amount * Math.cos(dir) * 1.15;
+    myCenterY += amount * Math.sin(dir) * 1.15;
   }
+  public void randomGenerate(){
+    double rotation = 0;
+    double moveRotation = (float)((360 / corners)*(Math.PI/180));
+    xCorners[0] = 0;
+    yCorners[0] = (int)((Math.random() * mySize/4) + mySize/2);
+    for(int i = 1; i < corners; i++){
+      rotation += moveRotation;
+      xCorners[i] = (int)((Math.random() * mySize/4 + mySize/2) * Math.sin(rotation));
+      yCorners[i] = (int)((Math.random() * mySize/4 + mySize/2) * Math.cos(rotation));
+    }
+  }
+  //For debugging collisions
+  /*void show(){
+    super.show();
+    fill(0, 0, 0, 0);
+    stroke(255, 0 , 0);
+    ellipse((float)myCenterX, (float)myCenterY, mySize, mySize);
+  }*/
 }
